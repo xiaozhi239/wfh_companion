@@ -12,6 +12,7 @@ dependencies:
 
   cupertino_icons: ^0.1.2
   noise_meter: ^1.0.1
+  flutter_duration_picker: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -19,5 +20,8 @@ dev_dependencies:
 
 
 flutter:
+
+  assets:
+    - assets/images/
 
   uses-material-design: true
