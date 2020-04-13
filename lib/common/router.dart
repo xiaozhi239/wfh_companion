@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wfh_companion/meditation/meditation_page.dart';
+import 'package:wfh_companion/movie/movies_page.dart';
 import 'package:wfh_companion/roar/roar_page.dart';
 import 'package:wfh_companion/sports/sports_page.dart';
 
@@ -28,6 +29,11 @@ class Router {
         Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SportsPage()));
+        break;
+      case RouteDest.Movies:
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MoviesPage()));
         break;
       default:
     }

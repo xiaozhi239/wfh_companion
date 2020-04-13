@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:async';
-
 import 'package:wfh_companion/roar/listening.dart';
+import 'dart:async';
 
 class RoarPage extends StatefulWidget {
   @override
