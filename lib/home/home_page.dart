@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:wfh_companion/common/router.dart';
-import 'package:wfh_companion/common/themes.dart';
 import 'package:wfh_companion/home/widgets/action_button.dart';
 
 class HomePage extends StatelessWidget {
@@ -13,7 +12,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppTitle),
+        title: Text("WFH Companion"),
       ),
       body: Center(
         child: Column(

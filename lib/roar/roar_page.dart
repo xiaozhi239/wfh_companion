@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wfh_companion/common/themes.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'dart:async';
 
@@ -19,15 +18,13 @@ class _RoarPageState extends State<RoarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppTitle),
+        title: Text("Roar"),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              infoText(),
-            ),
+            infoPanel(),
           ],
         ),
       ),
@@ -37,21 +34,28 @@ class _RoarPageState extends State<RoarPage> {
     );
   }
 
-  String infoText() {
+  Widget infoPanel() {
     if (_isRecording) {
-      return 'Come on, shout louder, you could do better!';
+      return Text(
+        'Come on, shout louder, you could do better!',
+        style: TextStyle(fontSize: 18),
+      );
     } else {
-      return _highestDb == 0 ? 'Press mic and start shouting!' : textWithGrade(_highestDb);
+      return Text(
+        _highestDb == 0 ? 'Press mic and start shouting!' : textWithDecibels(_highestDb),
+        style: TextStyle(fontSize: 18),
+      );
     }
   }
 
-  String textWithGrade(double score) {
-    if (score < 70) {
-      return 'You only made {$score} DB noise, hope you do better in your life';
-    } else if (score >= 70 && score < 100) {
-      return 'You made {$score} DB noise, keep going!';
+  String textWithDecibels(double decibels) {
+    final noise = decibels.toStringAsFixed(1);
+    if (decibels <= 60) {
+      return 'You only made $noise dB noise, good for your neightborhood.';
+    } else if (decibels >= 60 && decibels < 80) {
+      return 'You made $noise dB noise, keep going!';
     } else {
-      return 'You successfully made {$score} DB noise, I think you are ready to conquer the world!';
+      return 'You successfully made $noise dB noise, I think you are ready to conquer the world!';
     }
   }
 
@@ -63,19 +67,34 @@ class _RoarPageState extends State<RoarPage> {
     }
   }
 
-  void onData(NoiseReading noiseReading) {
-    print(noiseReading.toString());
-    // Update highest db.
+  double extractDecibels(String noiseReading) {
+    final pattern = new RegExp(r'\s+(\d+.\d+)\s+'); // 800 is the size of each chunk
+    double max = 0;
+    pattern.allMatches(noiseReading).forEach((match) {
+      var db = double.parse(match[0]);
+      if (db > max) {
+        max = db;
+      }
+    });
+    return max;
+  }
+
+  void onNoiseData(NoiseReading noiseReading) {
+    // [VolumeReading: 66.69737886870621 dB]
+    double decibels = extractDecibels(noiseReading.toString());
+    if (decibels > this._highestDb) {
+      this._highestDb = decibels;
+    }
   }
 
   void startRecorder() async {
-    print('***NEW RECORDING***');
     setState(() {
       this._isRecording = true;
+      this._highestDb = 0;
     });
     try {
       _noiseMeter = new NoiseMeter();
-      _noiseSubscription = _noiseMeter.noiseStream.listen(onData);
+      _noiseSubscription = _noiseMeter.noiseStream.listen(onNoiseData);
     } on NoiseMeterException catch (exception) {
       print(exception);
       stopRecorder();
@@ -83,7 +102,6 @@ class _RoarPageState extends State<RoarPage> {
   }
 
   void stopRecorder() async {
-    print('***STOP RECORDING***');
     try {
       if (_noiseSubscription != null) {
         _noiseSubscription.cancel();
@@ -95,10 +113,5 @@ class _RoarPageState extends State<RoarPage> {
     } catch (err) {
       print('stopRecorder error: $err');
     }
-  }
-
-  void printWrapped(String text) {
-    final pattern = new RegExp('.{1,800}'); // 800 is the size of each chunk
-    pattern.allMatches(text).forEach((match) => print(match.group(0)));
   }
 }
