@@ -14,6 +14,8 @@ dependencies:
   noise_meter: ^1.0.1
   flutter_duration_picker: ^1.0.0
   flutter_ringtone_player: ^2.0.0
+  permission_handler: ^5.0.0+hotfix.3
+  fluttertoast: ^4.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:noise_meter/noise_meter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
 import 'package:wfh_companion/roar/listening.dart';
@@ -60,8 +62,12 @@ class _RoarPageState extends State<RoarPage> with SingleTickerProviderStateMixin
     final colors = [Colors.green, Colors.yellow[700], Colors.red[400]];
     return Visibility (
       visible: !_isRecording,
-      child: Text(
-        _highestDb == 0 ? "Press mic and start roaring" :
+      child: _highestDb == 0
+      ? Text(
+          "Press mic and start roaring",
+          style: TextStyle(fontSize: 18, color: Colors.black),
+          )
+      : Text(
         "You made highest ${_highestDb.toStringAsFixed(1)} dB noise",
         style: TextStyle(fontSize: 18, color: colors[_noiseLevel(_highestDb)]),
       )
@@ -107,6 +113,16 @@ class _RoarPageState extends State<RoarPage> with SingleTickerProviderStateMixin
   }
 
   void startRecorder() async {
+    if (await Permission.microphone.request().isGranted == false) {
+      Fluttertoast.showToast(
+          msg: "You have to grant microphone permission to proceed",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          fontSize: 16.0
+      );
+      return;
+    }
     setState(() {
       this._isRecording = true;
       this._highestDb = 0;
