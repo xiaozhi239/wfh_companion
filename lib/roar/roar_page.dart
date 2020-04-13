@@ -2,17 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:noise_meter/noise_meter.dart';
 import 'dart:async';
 
+import 'package:wfh_companion/roar/listening.dart';
+
 class RoarPage extends StatefulWidget {
   @override
   _RoarPageState createState() => new _RoarPageState();
 }
 
-class _RoarPageState extends State<RoarPage> {
+class _RoarPageState extends State<RoarPage> with SingleTickerProviderStateMixin {
 
   bool _isRecording = false;
   StreamSubscription<NoiseReading> _noiseSubscription;
   NoiseMeter _noiseMeter;
   double _highestDb = 0;
+  AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = new AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,42 +39,46 @@ class _RoarPageState extends State<RoarPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            infoPanel(),
+            new CustomPaint(
+              painter: new ListeningIndicator(_animationController),
+              child: new SizedBox(
+                width: 200.0,
+                height: 200.0,
+              ),
+            ),
+            _infoPanel(),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: recordIconPressed,
+          onPressed: _recordIconPressed,
           child: Icon(this._isRecording ? Icons.stop : Icons.mic)),
     );
   }
 
-  Widget infoPanel() {
-    if (_isRecording) {
-      return Text(
-        'Come on, shout louder, you could do better!',
-        style: TextStyle(fontSize: 18),
-      );
+  Widget _infoPanel() {
+    final colors = [Colors.green, Colors.yellow[700], Colors.red[400]];
+    return Visibility (
+      visible: !_isRecording,
+      child: Text(
+        _highestDb == 0 ? "Press mic and start roaring" :
+        "You made highest ${_highestDb.toStringAsFixed(1)} dB noise",
+        style: TextStyle(fontSize: 18, color: colors[_noiseLevel(_highestDb)]),
+      )
+    );
+  }
+
+  int _noiseLevel(double decibels) {
+    if (decibels < 70) {
+      return 0;
+    } else if (decibels >= 70 && decibels < 90) {
+      return 1;
     } else {
-      return Text(
-        _highestDb == 0 ? 'Press mic and start shouting!' : textWithDecibels(_highestDb),
-        style: TextStyle(fontSize: 18),
-      );
+      return 2;
     }
   }
 
-  String textWithDecibels(double decibels) {
-    final noise = decibels.toStringAsFixed(1);
-    if (decibels <= 60) {
-      return 'You only made $noise dB noise, good for your neightborhood.';
-    } else if (decibels >= 60 && decibels < 80) {
-      return 'You made $noise dB noise, keep going!';
-    } else {
-      return 'You successfully made $noise dB noise, I think you are ready to conquer the world!';
-    }
-  }
-
-  void recordIconPressed() {
+  void _recordIconPressed() {
     if (_isRecording) {
       stopRecorder();
     } else {
@@ -67,7 +86,7 @@ class _RoarPageState extends State<RoarPage> {
     }
   }
 
-  double extractDecibels(String noiseReading) {
+  double _extractDecibels(String noiseReading) {
     final pattern = new RegExp(r'\s+(\d+.\d+)\s+'); // 800 is the size of each chunk
     double max = 0;
     pattern.allMatches(noiseReading).forEach((match) {
@@ -79,9 +98,9 @@ class _RoarPageState extends State<RoarPage> {
     return max;
   }
 
-  void onNoiseData(NoiseReading noiseReading) {
+  void _onNoiseData(NoiseReading noiseReading) {
     // [VolumeReading: 66.69737886870621 dB]
-    double decibels = extractDecibels(noiseReading.toString());
+    double decibels = _extractDecibels(noiseReading.toString());
     if (decibels > this._highestDb) {
       this._highestDb = decibels;
     }
@@ -92,9 +111,10 @@ class _RoarPageState extends State<RoarPage> {
       this._isRecording = true;
       this._highestDb = 0;
     });
+    _startAnimation();
     try {
       _noiseMeter = new NoiseMeter();
-      _noiseSubscription = _noiseMeter.noiseStream.listen(onNoiseData);
+      _noiseSubscription = _noiseMeter.noiseStream.listen(_onNoiseData);
     } on NoiseMeterException catch (exception) {
       print(exception);
       stopRecorder();
@@ -102,6 +122,7 @@ class _RoarPageState extends State<RoarPage> {
   }
 
   void stopRecorder() async {
+    _stopAnimation();
     try {
       if (_noiseSubscription != null) {
         _noiseSubscription.cancel();
@@ -113,5 +134,17 @@ class _RoarPageState extends State<RoarPage> {
     } catch (err) {
       print('stopRecorder error: $err');
     }
+  }
+
+  void _startAnimation() {
+    _stopAnimation();
+    _animationController.repeat(
+      period: Duration(seconds: 1),
+    );
+  }
+
+  void _stopAnimation() {
+    _animationController.stop();
+    _animationController.reset();
   }
 }
