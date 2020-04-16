@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:wfh_companion/movie/data/movie.dart';
 import 'package:wfh_companion/movie/data/movie_fetcher.dart';
 
-import 'package:intl/intl.dart';
 import 'package:wfh_companion/movie/widgets/movie_card.dart';
 
 class MoviesPage extends StatefulWidget {
