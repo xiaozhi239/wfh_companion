@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wfh_companion/movie/data/Movie.dart';
-import 'package:wfh_companion/movie/data/MovieFetcher.dart';
+import 'package:wfh_companion/movie/data/movie.dart';
+import 'package:wfh_companion/movie/data/movie_fetcher.dart';
+
+import 'package:intl/intl.dart';
+import 'package:wfh_companion/movie/widgets/movie_card.dart';
 
 class MoviesPage extends StatefulWidget {
   @override
@@ -9,7 +12,7 @@ class MoviesPage extends StatefulWidget {
 
 class _MoviesPageState extends State<MoviesPage> {
 
-  static final _movieCount = 8;
+  static final _movieCount = 10;
   final MovieFetcher _movieFetcher = new MovieFetcher();
   Future<List<Movie>> _moviesFuture;
 
@@ -21,6 +24,7 @@ class _MoviesPageState extends State<MoviesPage> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Add TMDB logo
     return Scaffold(
       appBar: AppBar(
         title: Text("Random movies"),
@@ -48,19 +52,11 @@ class _MoviesPageState extends State<MoviesPage> {
         child: new RefreshIndicator(
           child: ListView.builder(
               padding: const EdgeInsets.all(8),
-              itemCount: _movieCount,
-              itemBuilder: (context, index) => _movieItem(movies[index])
+              itemCount: movies.length,
+              itemBuilder: (context, index) =>
+              new MovieCard(movie: movies[index])
           ),
           onRefresh: _refreshActions,
-        )
-    );
-  }
-
-  Widget _movieItem(Movie movie) {
-    return Card(
-        child: ListTile(
-            title: Text("Movie title: ${movie.title}"),
-            trailing: Text("Release date")
         )
     );
   }

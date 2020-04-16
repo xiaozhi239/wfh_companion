@@ -16,6 +16,8 @@ dependencies:
   flutter_ringtone_player: ^2.0.0
   permission_handler: ^5.0.0+hotfix.3
   fluttertoast: ^4.0.0
+  tmdb_api: ^1.0.1-stable
+  intl: ^0.16.1
 
 dev_dependencies:
   flutter_test:
@@ -25,6 +27,7 @@ dev_dependencies:
 flutter:
 
   assets:
+    - assets/configs/
     - assets/images/
 
   uses-material-design: true
